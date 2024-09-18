@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片修复演示系统</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('../static/background.jpeg') no-repeat center center fixed;
+            text-align: center;
+            background-size: cover; /* 确保背景图覆盖整个页面 */
+
+            margin: 0;
+            padding: 0;
+        }
+
+        #content {
+    padding-bottom: 100px; /* 确保底部留出空间，以防止内容被底部固定位置覆盖 */
+}
+
+        #logo {
+            position: absolute;
+            top: 20px;
+            left: 800px;
+            width: 220px;
+        }
+
+        h1 {
+            font-size: 58px;
+            color: #333;
+            margin-top: 100px;
+        }
+
+        #imageWrapper {
+            border: 2px solid #ccc;
+            margin: 20px auto;
+            position: relative;
+            cursor: pointer;
+            display: inline-block;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: box-shadow 0.3s ease;
+        }
+
+        #imageWrapper:hover {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        #uploadedImage, #generatedImage {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .point {
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            position: absolute;
+            pointer-events: none;
+        }
+
+        #buttonContainer {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .largerBox {
+            width: 120%;
+            max-width: 1800px;
+            height: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .button {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px 40px;
+            transition: background-color 0.3s ease;
+            font-size: 25px;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        #generatedImageContainer {
+            margin: 20px auto;
+            max-width: 100%;
+        }
+
+        #imagesContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+        
+        }
+
+        #imagesContainer img {
+            width: 1200px;
+            margin: 10px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: box-shadow 0.3s ease;
+        }
+
+        #imagesContainer img {
+            margin-top: 50px;  /* 添加这个属性来设置图片间的间距 */
+        }
+
+        .imageName {
+            font-size: 30px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        #imagesContainer img:hover {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        #sidebar {
+            position: fixed;
+            right: 5%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 200px;
+            height: 230px;
+            background-color: #ebf8f8;
+            padding: 20px;
+            border-left: 1px solid #ccc;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+            border-radius: 20px;
+
+        }
+
+       
+        #sidebar .statusOption {
+    font-size: 23px; /* 根据需要调整字号大小 */
+    padding: 10px; /* 可选：增加内边距来改善视觉效果 */
+    margin-bottom: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+        #sidebar .statusOption.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            .button {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            #imagesContainer img {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+
+
+        .buttonContainer {
+    position: absolute; /* 如果需要绝对定位 */
+    top: 300px; /* 根据需要调整位置 */
+    left: 50px; /* 根据需要调整位置 */
+    display: flex;
+    justify-content: flex-start;
+    z-index: 100; /* 根据需要调整 z-index */
+}
+
+@media (max-width: 600px) {
+    .buttonContainer {
+        position: static; /* 在小屏幕上改为静态定位或根据需要调整 */
+        flex-direction: column; /* 在小屏幕上可能需要垂直排列 */
+        align-items: flex-start; /* 在小屏幕上可能需要左对齐 */
+    }
+}
+
+
+
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <div class="statusOption active" id="removeOption">去除功能</div>
+        <div class="statusOption" id="fillOption">填充功能</div>
+        <div class="statusOption" id="replaceOption">替换功能</div>
+        <div class="statusOption" id="videoOption">视频去除功能</div>
+
+    </div>
+
+    <div id="content" >
+        <img id="logo" src="./static/scut_logo.jpeg" alt="SCUT Logo">
+        <h1 style="margin-bottom: 50px;">SAM成果展示：图片修复演示系统</h1 >
+<div id="imageWrapper" class="largerBox">
+    <img id="uploadedImage" src="#" alt="">
+</div>
+
+<div id="buttonContainer" >
+    <button class="button" id="uploadBtn">上传图片</button>
+    <button class="button" id="markPointBtn">标点</button>
+
+    <div id="removePage" >
+        <div>
+            <div id="buttonContainerremove" >
+                <button class="button" id="processBtn">处理图片</button>
+                <input type="file" id="imageInput" style="display: none;">
+            </div>
+        </div>
+    </div>
+    
+    <div id="fillPage"  style="display: none;">
+        <div>
+            <div id="buttonContainerFill" style=>
+                <button class="button" id="processBtnFill">处理图片</button>
+                <input type="file" id="imageInputFill" style="display: none;">
+            </div>
+            
+        </div>
+    </div>
+    
+    <div id="replacePage"  style="display: none;">
+        <div>
+            <div id="buttonContainerReplace" >
+                <button class="button" id="processBtnReplace">处理图片</button>
+                <input type="file" id="imageInputReplace" style="display: none;">
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+ 
+        <div class="textBox" style="margin-top: 20px;">
+            <input type="text" id="replaceText" placeholder="关于图片的描述：" style="width: 700px;height: 60px; font-size: 30px; padding-left: 20px; padding-right: 20px;">
+        </div>
+
+
+
+
+        
+        <div id="imagesContainer"></div>
+    </div>
+
+    <footer>
+        <p style="text-align: center; font-size: 20px; margin-top: 220px; margin-bottom: 30px;">
+            Copyright &copy; Group 4 of Information Engineering 2024. All rights reserved.
+        </p>
+    </footer>
+
+    <script>
+function getImageName(imageUrl) {
+            // 在这里编写获取图片名称的逻辑，例如从图片URL中提取
+            // 这里简单示例，假设图片URL以斜杠分割并且最后一部分是图片名称
+            const parts = imageUrl.split('/');
+            return parts[parts.length - 1];
+        }
+
+        var imageWrapper = document.getElementById('imageWrapper');
+        var uploadedImage = document.getElementById('uploadedImage');
+        var processBtn = document.getElementById('processBtn');
+        var currentPoint = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const removeOption = document.getElementById('removeOption');
+            const fillOption = document.getElementById('fillOption');
+            const replaceOption = document.getElementById('replaceOption');
+
+            const removePage = document.getElementById('removePage');
+            const fillPage = document.getElementById('fillPage');
+            const replacePage = document.getElementById('replacePage');
+
+            removeOption.addEventListener('click', function() {
+                setActiveOption(removeOption);
+                showPage(removePage);
+            });
+
+            fillOption.addEventListener('click', function() {
+                setActiveOption(fillOption);
+                showPage(fillPage);
+            });
+
+            replaceOption.addEventListener('click', function() {
+                setActiveOption(replaceOption);
+                showPage(replacePage);
+            });
+
+            function setActiveOption(option) {
+                removeOption.classList.remove('active');
+                fillOption.classList.remove('active');
+                replaceOption.classList.remove('active');
+                option.classList.add('active');
+            }
+
+            function showPage(page) {
+                removePage.style.display = 'none';
+                fillPage.style.display = 'none';
+                replacePage.style.display = 'none';
+                page.style.display = 'block';
+
+                
+            }
+
+            function updatePoint(x, y) {
+            if (currentPoint) {
+                currentPoint.style.left = x + 'px';
+                currentPoint.style.top = y + 'px';
+            } else {
+                currentPoint = document.createElement('div');
+                currentPoint.className = 'point';
+                currentPoint.style.left = x + 'px';
+                currentPoint.style.top = y + 'px';
+                imageWrapper.appendChild(currentPoint);
+            }
+            console.log("x:", currentPoint.style.left, "y:", currentPoint.style.top);
+        }
+
+
+            uploadedImage.addEventListener('click', function(event) {
+            var x = event.offsetX;
+            var y = event.offsetY;
+            updatePoint(x, y);
+        });
+            // 上传图片、标点和处理图片功能代码可以在这里补充
+            document.getElementById('uploadBtn').addEventListener('click', function() {
+            document.getElementById('imageInput').click();
+        });
+
+            
+
+
+            document.getElementById('imageInput').addEventListener('change', function(event) {
+            var file = event.target.files[0];
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImage.src = e.target.result;
+                uploadedImage.onload = function() {
+                    imageWrapper.style.width = uploadedImage.naturalWidth + 'px';
+                    imageWrapper.style.height = uploadedImage.naturalHeight + 'px';
+                };
+            };
+            reader.readAsDataURL(file);
+            var formData = new FormData();
+            formData.append('image', file);
+
+            fetch('{% url "upload_image" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    var imageId = data.image_path;
+                    document.getElementById('processBtn').setAttribute('data-image-id', imageId);
+                } else {
+                    console.error('Error uploading image:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+
+
+
+
+
+        
+
+
+        document.getElementById('processBtn').addEventListener('click', function() {
+                if (currentPoint) {
+                    var imageId = this.getAttribute('data-image-id');
+                    var pointCoords = [parseInt(currentPoint.style.left), parseInt(currentPoint.style.top)];
+                    fetch('{% url "process_image" %}', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            image_id: imageId,
+                            point_coords: pointCoords
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            var imageId = this.getAttribute('data-image-id');
+                            var cleanImageId = imageId.split('.')[0];
+                            fetchAndDisplayImages(cleanImageId);
+                            alert('图片处理成功！');
+                        } else {
+                            console.error('Error:', data.error);
+                            alert('图片处理失败：' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('处理请求失败：' + error);
+                    });
+                } else {
+                    alert('请先上传图片并标记点！');
+                }
+            });
+
+        function fetchAndDisplayImages(imagePath) {
+            fetch('/list_images/' + encodeURIComponent(imagePath))
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+
+                    const container = document.getElementById('imagesContainer');
+                    container.innerHTML = '';
+                    data.images.forEach(image => {
+                        const img = document.createElement('img');
+                        img.src = image;
+                        img.style.width = '1200px'; // 调整图片尺寸
+                        img.style.margin = '10px';
+                        img.style.borderRadius = '5px';
+                        img.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                        img.style.transition = 'box-shadow 0.3s ease';
+                        container.appendChild(img);
+
+                        const imageName = document.createElement('div');
+                        imageName.textContent = getImageName(image); // 获取图片名称
+                        imageName.classList.add('imageName');
+                        container.appendChild(imageName);
+                        alert('图片处理成功！');
+
+                    });
+                } else {
+                    console.error('Error fetching images:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+            });
+        }
+
+        
+
+
+
+
+
+
+
+
+            function displayImagesDemo() {
+                // 模拟从文件夹提取图片
+                const demoImages = [
+                    'image1.jpg', 'image2.jpg', 'image3.jpg', 'image4.jpg', 'image5.jpg',
+                    'image6.jpg', 'image7.jpg', 'image8.jpg', 'image9.jpg', 'image10.jpg'
+                ];
+                const container = document.getElementById('imagesContainer');
+                container.innerHTML = '';
+                demoImages.forEach(image => {
+                    const img = document.createElement('img');
+                    img.src = `./result/scut/${image}`;
+                    container.appendChild(img);
+
+                    const imageName = document.createElement('div');
+                    imageName.textContent = image;
+                    imageName.classList.add('imageName');
+                    container.appendChild(imageName);
+                });
+            }
+        });
+
+
+
+
+
+
+        function delayedFetchAndDisplay() {
+            setTimeout(function() {
+                fetch('/list_results_images/')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('图片处理成功！');
+
+                        const container = document.getElementById('imagesContainer');
+                        container.innerHTML = '';
+                        data.images.forEach(image => {
+                            const img = document.createElement('img');
+                            img.src = image;
+                            img.style.width = '1200px'; // 调整图片尺寸
+                            img.style.margin = '10px';
+                            img.style.borderRadius = '5px';
+                            img.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                            img.style.transition = 'box-shadow 0.3s ease';
+                            container.appendChild(img);
+
+                            const imageName = document.createElement('div');
+                            imageName.textContent = getImageName(image); // 获取图片名称
+                            imageName.classList.add('imageName');
+                            container.appendChild(imageName);
+                        });
+                    } else {
+                        console.error('Error fetching images:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
+            }, 1*1000);
+        }
+
+        document.getElementById('processBtnFill').addEventListener('click', function() {
+            delayedFetchAndDisplay();
+        });
+
+        document.getElementById('processBtnReplace').addEventListener('click', function() {
+            delayedFetchAndDisplay();
+        });
+
+
+    </script>
+</body>
+</html>
